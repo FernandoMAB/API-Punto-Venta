@@ -20,34 +20,56 @@ public class UsuarioService : IUsuarioService
         return usuario;
     }
 
-    public async Task Save(Usuario usuario){
+    public async Task<IResult> Save(Usuario usuario){
 
         if (!context.Usuarios.Any())
             usuario.UsuId = 1;
         else
             usuario.UsuId = context.Usuarios.Max(x => x.UsuId) + 1;
-        
+        if(usuario.UsuFecNacimiento == null)
+            usuario.UsuFecNacimiento = DateTime.Now.AddYears(-18);
+        if(usuario.UsuNumCargas == null)
+            usuario.UsuNumCargas = 0;
         context.Usuarios.Add(usuario);
         await context.SaveChangesAsync();
+        return Results.Created($"{usuario.UsuId}", usuario.UsuId);
     }
-    public async Task Update(int id, Producto producto)
+    public async Task<IResult> Update(int id, Usuario usuario)
     {
-        var productUpdate = context.Productos.Find(id);
+        var usuarioUpdate = context.Usuarios.Find(id);
 
-        if(productUpdate != null)
+        if(usuarioUpdate != null)
         {
-           productUpdate.ComId          = producto.ComId == null        ? productUpdate.ComId : producto.ComId;
-           productUpdate.ProNombre      = producto.ProNombre == null    ? productUpdate.ProNombre : producto.ProNombre;
-           productUpdate.ProDescuento   = producto.ProDescuento == null ? productUpdate.ProDescuento : producto.ProDescuento;
-           productUpdate.ProPrecio      = producto.ProPrecio == null    ? productUpdate.ProPrecio : producto.ProPrecio;
-           productUpdate.ProCodBarras   = producto.ProCodBarras == null ? productUpdate.ProCodBarras : producto.ProCodBarras;
-           productUpdate.ProCategoria   = producto.ProCategoria == null ? productUpdate.ProCategoria : producto.ProCategoria;
-           productUpdate.ProMarca       = producto.ProMarca == null     ? productUpdate.ProMarca : producto.ProMarca;
-           productUpdate.ProEstIva      = producto.ProEstIva == null    ? productUpdate.ProEstIva : producto.ProEstIva;
-           productUpdate.ProDetalle     = producto.ProDetalle == null   ? productUpdate.ProDetalle : producto.ProDetalle;
-           productUpdate.ProEstado      = producto.ProEstado == null    ? productUpdate.ProEstado : producto.ProEstado;
-           await context.SaveChangesAsync(); 
+            usuarioUpdate.UsuPNombre        = usuario.UsuPNombre;
+            usuarioUpdate.UsuPApellido      = usuario.UsuPApellido;
+            usuarioUpdate.UsuSNombre        = usuario.UsuSNombre;
+            usuarioUpdate.UsuSApellido      = usuario.UsuSApellido;
+            usuarioUpdate.UsuTipoIden       = usuario.UsuTipoIden;
+            usuarioUpdate.UsuNumeroIden     = usuario.UsuNumeroIden;
+            usuarioUpdate.UsuFecNacimiento  = usuario.UsuFecNacimiento;
+            usuarioUpdate.UsuEstCivil       = usuario.UsuEstCivil;
+            usuarioUpdate.UsuEmail          = usuario.UsuEmail;
+            usuarioUpdate.UsuTelefono       = usuario.UsuTelefono;
+            usuarioUpdate.UsuNumCelular     = usuario.UsuNumCelular;
+            usuarioUpdate.UsuNumCargas      = usuario.UsuNumCargas;
+            usuarioUpdate.UsuEstado         = usuario.UsuEstado;
+
+            await context.SaveChangesAsync();
+            return Results.Ok(usuarioUpdate);
         }
+        return null;
+    }
+
+    public async Task<IResult> Delete(int id)
+    {
+
+        if(await context.Usuarios.FindAsync(id) is Usuario usuarioToDelete)
+        {
+            context.Usuarios.Remove(usuarioToDelete);
+            await context.SaveChangesAsync();
+            return Results.Ok(usuarioToDelete);
+        }
+        return null;
     }
 }
 
@@ -55,7 +77,7 @@ public interface IUsuarioService
 {
     IEnumerable<Usuario> GetAll();
     Usuario? GetUsuario(int id);
-    Task Save(Usuario usuario);
-    //Task Update(int id, Usuario usuario);
-    //Task Delete(int id);
+    Task<IResult> Save(Usuario usuario);
+    Task<IResult> Update(int id, Usuario usuario);
+    Task<IResult> Delete(int id);
 }
