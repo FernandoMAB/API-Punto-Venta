@@ -31,8 +31,13 @@ namespace API_Punto_Venta.Controllers
         [HttpGet("{id}")]
         public IActionResult GetUsuario(int id)
         {
-            if(usuarioService.GetUsuario(id) is IResult result){
-                return Ok(result);
+            try{
+                var usuario = usuarioService.GetUsuario(id);
+                if(usuario != null){
+                    return Ok(usuario);
+                }
+            }catch(Exception ex){
+                return Conflict();
             }
             return NotFound();
         }
