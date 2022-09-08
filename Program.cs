@@ -30,6 +30,7 @@ builder.Services.AddScoped<IClienteService,  ClienteService>();
 builder.Services.AddScoped<IProductoService, ProductoService>();
 builder.Services.AddScoped<ICajaService,     CajaService>();
 builder.Services.AddScoped<IUsuarioService,  UsuarioService>();
+builder.Services.AddScoped<IRolService,      RolService>();
 
 var app = builder.Build();
 
