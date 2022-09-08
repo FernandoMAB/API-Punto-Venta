@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace API_Punto_Venta.Models
 {
@@ -28,10 +29,12 @@ namespace API_Punto_Venta.Models
         public string? UsuDireccion { get; set; }
         public int? UsuNumCargas { get; set; }
         public string? UsuEstado { get; set; }
+        public string? UsuUserName { get; set; }
+        public virtual Rol? Rol {get;set;}
 
         public virtual ICollection<Factura> Facturas { get; set; }
-
         public virtual ICollection<Caja> Cajs { get; set; }
+        [JsonIgnore]
         public virtual ICollection<Rol> Rols { get; set; }
     }
 }

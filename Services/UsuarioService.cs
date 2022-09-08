@@ -55,6 +55,7 @@ public class UsuarioService : IUsuarioService
             usuarioUpdate.UsuNumCelular     = usuario.UsuNumCelular;
             usuarioUpdate.UsuNumCargas      = usuario.UsuNumCargas;
             usuarioUpdate.UsuEstado         = usuario.UsuEstado;
+            usuarioUpdate.UsuUserName       = usuario.UsuUserName;
 
             await context.SaveChangesAsync();
             return Results.Ok(usuarioUpdate);

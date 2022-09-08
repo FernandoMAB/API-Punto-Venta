@@ -624,13 +624,14 @@ namespace API_Punto_Venta.Models
                     .HasMaxLength(1)
                     .IsUnicode(false)
                     .HasColumnName("USU_ESTADO")
+                    .HasDefaultValue("S")
                     .IsFixedLength();
 
                 entity.Property(e => e.UsuFecNacimiento)
                     .HasColumnType("datetime")
                     .HasColumnName("USU_FEC_NACIMIENTO");
 
-                entity.Property(e => e.UsuNumCargas).HasColumnName("USU_NUM_CARGAS");
+                entity.Property(e => e.UsuNumCargas).HasColumnName("USU_NUM_CARGAS").HasDefaultValue(0);
 
                 entity.Property(e => e.UsuNumCelular)
                     .HasMaxLength(30)
@@ -672,6 +673,14 @@ namespace API_Punto_Venta.Models
                     .IsUnicode(false)
                     .HasColumnName("USU_TIPO_IDEN")
                     .IsFixedLength();
+
+                entity.Property(e => e.UsuUserName)
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("USU_USERNAME")
+                    .IsFixedLength();
+
+                entity.Ignore(e => e.Rol);
 
                 entity.HasMany(d => d.Cajs)
                     .WithMany(p => p.Usus)

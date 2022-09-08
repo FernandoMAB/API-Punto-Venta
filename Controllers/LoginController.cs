@@ -12,10 +12,12 @@ namespace API_Punto_Venta.Controllers
     public class LoginController : ControllerBase
     {
         private IConfiguration _config;
+        private PuntoVentaContext context;
 
-        public LoginController(IConfiguration config)
+        public LoginController(IConfiguration config, PuntoVentaContext dbcontext)
         {
             _config = config;
+            this.context = dbcontext;
         }
 
         [AllowAnonymous]
@@ -46,7 +48,7 @@ namespace API_Punto_Venta.Controllers
                 new Claim(ClaimTypes.Email, user.UsuEmail),
                 new Claim(ClaimTypes.GivenName, user.UsuPNombre),
                 new Claim(ClaimTypes.Role, user.UsuEstado),
-                new Claim(ClaimTypes.Surname, user.UsuPNombre)
+                new Claim(ClaimTypes.Surname, user.UsuPApellido)
             };
 
             var token = new JwtSecurityToken(_config["Jwt:Issuer"],
@@ -60,15 +62,19 @@ namespace API_Punto_Venta.Controllers
 
         private Usuario Authenticate(UserLogin userLogin)
         {
-            var currentUser = UserConstants.Users.FirstOrDefault(o => o.UsuPNombre.ToLower() ==
-            userLogin.UserName.ToLower() && o.UsuContrasena == userLogin.Password);
+            try{
+                var currentUser = context.Usuarios.FirstOrDefault(o => o.UsuUserName.ToLower() ==
+                userLogin.UserName.ToLower() && o.UsuContrasena == userLogin.Password);
 
-            if (currentUser !=null)
-            {
-                return currentUser;
+                if (currentUser !=null)
+                {
+                    return currentUser;
+                }
+
+                return null;
+            }catch(Exception ex){
+                return null;
             }
-
-            return null;
         }
     }
 }
