@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace API_Punto_Venta.Models
 {
@@ -29,7 +30,7 @@ namespace API_Punto_Venta.Models
         public double? CajTotal { get; set; }
         public DateTime? CajFecha { get; set; }
         public string? CajEstado { get; set; }
-
+        [JsonIgnore]
         public virtual ICollection<Usuario> Usus { get; set; }
     }
 }

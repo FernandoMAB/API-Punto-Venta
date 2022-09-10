@@ -13,5 +13,8 @@ namespace API_Punto_Venta.Models
     public class TokenUsu
     {
         public string token {get;set;}
+
+        public virtual ICollection<Rol> Roles { get; set; }
+        public virtual ICollection<Caja> Cajas { get; set; }
     }
 }

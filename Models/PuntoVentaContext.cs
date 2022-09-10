@@ -680,8 +680,6 @@ namespace API_Punto_Venta.Models
                     .HasColumnName("USU_USERNAME")
                     .IsFixedLength();
 
-                entity.Ignore(e => e.Rol);
-
                 entity.HasMany(d => d.Cajs)
                     .WithMany(p => p.Usus)
                     .UsingEntity<Dictionary<string, object>>(

@@ -1,4 +1,5 @@
 using API_Punto_Venta.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace API_Punto_Venta.Services;
 
@@ -12,7 +13,10 @@ public class UsuarioService : IUsuarioService
 
     public IEnumerable<Usuario> GetAll()
     {
-        return context.Usuarios.Where(x => x.UsuEstado != Util.Constants.ESTADO_ELIMINADO);
+        return context.Usuarios.Where(x => x.UsuEstado != Util.Constants.ESTADO_ELIMINADO)
+                                .Include(x => (x as Usuario).Rols)
+                                .Include(x => x.Cajs)
+                                .ToList();
     }
     public Usuario? GetUsuario(int id)
     {

@@ -5,6 +5,7 @@ using API_Punto_Venta.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
 
 namespace API_Punto_Venta.Controllers
 {
@@ -31,6 +32,8 @@ namespace API_Punto_Venta.Controllers
                 var token = Generate(user);
                 var tokenUsu = new TokenUsu();
                 tokenUsu.token = token;
+                tokenUsu.Roles = user.Rols;
+                tokenUsu.Cajas = user.Cajs;
                 return Ok(tokenUsu);
             }
 
@@ -63,7 +66,9 @@ namespace API_Punto_Venta.Controllers
         private Usuario Authenticate(UserLogin userLogin)
         {
             try{
-                var currentUser = context.Usuarios.FirstOrDefault(o => o.UsuUserName.ToLower() ==
+                var currentUser = context.Usuarios.Include(x => x.Rols)
+                                                    .Include(x => x.Cajs)
+                                                    .FirstOrDefault(o => o.UsuUserName.ToLower() ==
                 userLogin.UserName.ToLower() && o.UsuContrasena == userLogin.Password);
 
                 if (currentUser !=null)
