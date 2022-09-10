@@ -12,7 +12,7 @@ public class UsuarioService : IUsuarioService
 
     public IEnumerable<Usuario> GetAll()
     {
-        return context.Usuarios.Where(x => x.UsuEstado != "E");
+        return context.Usuarios.Where(x => x.UsuEstado != Util.Constants.ESTADO_ELIMINADO);
     }
     public Usuario? GetUsuario(int id)
     {
@@ -68,7 +68,7 @@ public class UsuarioService : IUsuarioService
 
         if(await context.Usuarios.FindAsync(id) is Usuario usuarioToDelete)
         {
-            usuarioToDelete.UsuEstado = "E";
+            usuarioToDelete.UsuEstado = Util.Constants.ESTADO_ELIMINADO;
             await context.SaveChangesAsync();
             return Results.Ok(usuarioToDelete);
         }

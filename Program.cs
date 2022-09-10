@@ -31,6 +31,7 @@ builder.Services.AddScoped<IProductoService, ProductoService>();
 builder.Services.AddScoped<ICajaService,     CajaService>();
 builder.Services.AddScoped<IUsuarioService,  UsuarioService>();
 builder.Services.AddScoped<IRolService,      RolService>();
+builder.Services.AddScoped<IPermisoService,  PermisoService>();
 
 var app = builder.Build();
 

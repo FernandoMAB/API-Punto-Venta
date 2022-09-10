@@ -13,7 +13,7 @@ public class RolService : IRolService
 
     public IEnumerable<Rol> GetAll()
     {
-        return context.Rols.Where(x => x.RolEstado != "E").OrderBy(x => x.RolId);
+        return context.Rols.Where(x => x.RolEstado != Util.Constants.ESTADO_ELIMINADO).OrderBy(x => x.RolId);
     }
 
     public Rol? GetRol(int id)
@@ -56,7 +56,7 @@ public class RolService : IRolService
 
         if(await context.Rols.FindAsync(id) is Rol rolToDelete)
         {
-            rolToDelete.RolEstado = "E";
+            rolToDelete.RolEstado = Util.Constants.ESTADO_ELIMINADO;
             await context.SaveChangesAsync();
             return Results.Ok(rolToDelete);
         }
