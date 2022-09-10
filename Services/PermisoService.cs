@@ -24,6 +24,13 @@ public class PermisoService : IPermisoService
                     ? permiso
                     : null;
     }
+
+    public IEnumerable<Permiso> GetPermisoByRol(int idRol)
+    {
+        if(context.Permisos.Any())
+        return context.Permisos.Where(x => x.RolId == idRol);
+        else return null;
+    }
     public async Task<IResult> Save(Permiso permiso)
     {
         if(!context.Permisos.Any())
@@ -65,6 +72,7 @@ public interface IPermisoService
 {
     IEnumerable<Permiso> GetAll();
     Permiso? GetPermiso(int id);
+    IEnumerable<Permiso> GetPermisoByRol(int idRol);
     Task<IResult> Save(Permiso permiso);
     Task<IResult> Update(int id, Permiso permiso);
     Task<IResult> Delete(int id);

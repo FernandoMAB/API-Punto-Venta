@@ -47,6 +47,20 @@ namespace API_Punto_Venta.Controllers
             return NotFound();
         }
 
+        [HttpGet("GetByRol/{id}")]
+        public IActionResult GetPermisoByRol(int id)
+        {
+            try{
+                var permiso = permisoService.GetPermisoByRol(id);
+                if(permiso != null && permiso.Any()){
+                    return Ok(permiso);
+                }
+            }catch(Exception ex){
+                return Conflict();
+            }
+            return NotFound();
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] Permiso permiso)
         {
