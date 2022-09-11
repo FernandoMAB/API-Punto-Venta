@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace API_Punto_Venta.Models
 {
@@ -11,6 +12,7 @@ namespace API_Punto_Venta.Models
         public string? CaProEstado { get; set; }
 
         public virtual Categorium? Cat { get; set; }
+        [JsonIgnore]
         public virtual Producto? Pro { get; set; }
     }
 }

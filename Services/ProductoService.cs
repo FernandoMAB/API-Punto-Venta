@@ -1,4 +1,5 @@
 using API_Punto_Venta.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace API_Punto_Venta.Services;
 
@@ -14,7 +15,7 @@ public class ProductoService : IProductoService
 
     public IEnumerable<Producto> GetAll()
     {
-        return context.Productos;
+        return context.Productos.Include(x => x.CategoriaProductos).ThenInclude(c => c.Cat);
     }
 
     public Producto? GetProducto(int id)
