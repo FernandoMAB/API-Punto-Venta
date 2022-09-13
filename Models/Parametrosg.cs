@@ -9,5 +9,6 @@ namespace API_Punto_Venta.Models
         public string? ParDescrip { get; set; }
         public string? ParValor { get; set; }
         public string? ParEstado { get; set; }
+        public string? ParNemonico { get; set;}
     }
 }

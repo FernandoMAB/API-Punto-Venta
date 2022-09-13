@@ -433,6 +433,12 @@ namespace API_Punto_Venta.Models
                     .HasMaxLength(300)
                     .IsUnicode(false)
                     .HasColumnName("PAR_VALOR");
+
+                entity.Property(e => e.ParNemonico)
+                    .HasMaxLength(300)
+                    .IsFixedLength()
+                    .HasColumnName("PAR_NEMONICO");
+                    
             });
 
             modelBuilder.Entity<Permiso>(entity =>

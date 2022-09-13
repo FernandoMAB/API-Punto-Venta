@@ -13,7 +13,7 @@ public class CategoriaService : ICategoriaService
 
     public IEnumerable<Categorium> GetAll()
     {
-        if(context.Permisos.Any())
+        if(context.Categoria.Any())
         return context.Categoria.Where(x => x.CatEstado != Util.Constants.ESTADO_ELIMINADO);
         else return null;
     }
