@@ -25,7 +25,12 @@ namespace API_Punto_Venta.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            return Ok(usuarioService.GetAll());
+            var usu = usuarioService.GetAll();
+            foreach (var item in usu)
+            {
+                item.UsuContrasena = null;
+            }
+            return Ok(usu);
         }
 
         [HttpGet("{id}")]
@@ -34,6 +39,7 @@ namespace API_Punto_Venta.Controllers
             try{
                 var usuario = usuarioService.GetUsuario(id);
                 if(usuario != null){
+                    usuario.UsuContrasena = null;
                     return Ok(usuario);
                 }
             }catch(Exception ex){

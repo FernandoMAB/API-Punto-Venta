@@ -29,6 +29,7 @@ namespace API_Punto_Venta.Models
         public virtual DbSet<Producto> Productos { get; set; } = null!;
         public virtual DbSet<Rol> Rols { get; set; } = null!;
         public virtual DbSet<Usuario> Usuarios { get; set; } = null!;
+        public virtual DbSet<Catalogo> Catalogos { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -706,6 +707,18 @@ namespace API_Punto_Venta.Models
 
                             j.IndexerProperty<int>("CajId").HasColumnName("CAJ_ID");
                         });
+            });
+
+            modelBuilder.Entity<Catalogo>(entity =>
+            {
+                entity.ToTable("CATALOGO");
+
+                entity.HasNoKey();
+
+                entity.Property(p => p.CataNombre).HasColumnType("varchar").HasMaxLength(100).HasColumnName("CATA_NOMBRE").IsRequired();
+                entity.Property(p => p.CataCodigo).HasColumnType("varchar").HasMaxLength(10).HasColumnName("CATA_CODIGO").IsRequired();
+                entity.Property(p => p.CataValor).HasColumnType("varchar").HasMaxLength(100).HasColumnName("CATA_VALOR").IsRequired();
+                entity.Property(p => p.CataEstado).HasColumnType("char").HasMaxLength(1).HasColumnName("CATA_ESTADO").IsRequired();
             });
 
             OnModelCreatingPartial(modelBuilder);
