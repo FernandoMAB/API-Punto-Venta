@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace API_Punto_Venta.Models
 {
@@ -8,6 +9,7 @@ namespace API_Punto_Venta.Models
         public Cliente()
         {
             Facturas = new HashSet<Factura>();
+            Documentos = new HashSet<Documento>();
         }
 
         public int CliId { get; set; }
@@ -24,5 +26,8 @@ namespace API_Punto_Venta.Models
         public string? CliEstado { get; set; }
 
         public virtual ICollection<Factura> Facturas { get; set; }
+        [JsonIgnore]
+        public virtual ICollection<Documento> Documentos { get; set; }
+
     }
 }

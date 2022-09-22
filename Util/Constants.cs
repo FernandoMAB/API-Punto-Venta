@@ -17,6 +17,7 @@ public class Constants
     public const string NONPERSON = @"No existe persona";
     public const string NONUSER = @"No existe usuario";
     public const string NONCATA = @"No existe catalogo";
+    public const string NONDOCU = @"No existe documento";
     public const string NONCALE = @"No existe calificación";
     public const string NONMATE = @"No existe materia";
     public const string USEREPE = @"Ya existe un usuario con este nombre de usuario";

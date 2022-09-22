@@ -1,5 +1,5 @@
 using System.Text;
-using API_Punto_Venta.Models;
+using API_Punto_Venta.Context;
 using API_Punto_Venta.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -35,6 +35,7 @@ builder.Services.AddScoped<IPermisoService,  PermisoService>();
 builder.Services.AddScoped<ICategoriaService,CategoriaService>();
 builder.Services.AddScoped<IParametroService,ParametroService>();
 builder.Services.AddScoped<ICatalogoService, CatalogoService>();
+builder.Services.AddScoped<IDocumentoService,DocumentoService>();
 
 var app = builder.Build();
 

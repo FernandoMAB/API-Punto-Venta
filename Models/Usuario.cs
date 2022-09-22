@@ -11,6 +11,7 @@ namespace API_Punto_Venta.Models
             Facturas = new HashSet<Factura>();
             Cajs = new HashSet<Caja>();
             Rols = new HashSet<Rol>();
+            Documentos = new HashSet<Documento>();
         }
 
         public int UsuId { get; set; }
@@ -34,5 +35,7 @@ namespace API_Punto_Venta.Models
         public virtual ICollection<Factura> Facturas { get; set; }
         public virtual ICollection<Caja> Cajs { get; set; }
         public virtual ICollection<Rol> Rols { get; set; }
+        [JsonIgnore]
+        public virtual ICollection<Documento> Documentos { get; set; }
     }
 }
