@@ -8,11 +8,11 @@ namespace API_Punto_Venta.Controllers
     public class AuthorizationController : ControllerBase
     {
         [HttpGet("Admin")]
-        [Authorize(Roles = "E")]
+        [Authorize(Roles ="1")]
         public IActionResult Admin()
         {
             var currentUser = GetCurrentUser();
-            return Ok($"HOLA Admin {currentUser.UserName},{currentUser.EmailAddress}");
+            return Ok($"HOLA Admin {currentUser.UserName},{currentUser.EmailAddress} el Rol es: {currentUser.roleId}");
         }
 
         [HttpGet("Public")]
@@ -27,13 +27,19 @@ namespace API_Punto_Venta.Controllers
             {
                 var userClaims = identity.Claims;
 
+                var role = 0;
+                if(userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Role)?.Value != null)
+                {
+                    role = int.Parse(userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Role)?.Value);
+                }
                 return new UserLogin
                 {
                     UserName = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.NameIdentifier)?.Value,
                     EmailAddress = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Email)?.Value,
                     GivenName = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.GivenName)?.Value,
                     Surname = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Surname)?.Value,
-                    Role = userClaims.FirstOrDefault(o => o.Type == ClaimTypes.Role)?.Value
+                    roleId = role
+
                 };
             }
             return null;

@@ -528,6 +528,11 @@ namespace API_Punto_Venta.Context
 
                 entity.Property(e => e.ProPrecio).HasColumnName("PRO_PRECIO");
 
+                entity.Property(e => e.ProStock)
+                    .HasColumnType("int")
+                    .IsRequired(false)
+                    .HasColumnName("PRO_STOCK");
+
                 entity.HasOne(d => d.Com)
                     .WithMany(p => p.Productos)
                     .HasForeignKey(d => d.ComId)

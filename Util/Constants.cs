@@ -7,6 +7,7 @@ public class Constants
 
 
     public const string NOTFOUND = @"No se encontró registro";
+    public const string ROLENOTFOUND = @"Cliente no tiene dicho rol";
     public const string MULTIPLENOTFOUND = @"No se encontraron registros";
     public const string NEGATIVEBALANCE = @"El saldo no puede ser negativo";
     public const string NONAVAILABLEBALANCE = @"Saldo no disponible";

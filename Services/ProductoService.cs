@@ -52,7 +52,8 @@ public class ProductoService : IProductoService
            productUpdate.ProEstIva      = producto.ProEstIva == null    ? productUpdate.ProEstIva : producto.ProEstIva;
            productUpdate.ProDetalle     = producto.ProDetalle == null   ? productUpdate.ProDetalle : producto.ProDetalle;
            productUpdate.ProEstado      = producto.ProEstado == null    ? productUpdate.ProEstado : producto.ProEstado;
-           await context.SaveChangesAsync(); 
+           productUpdate.ProStock      = producto.ProStock == null    ? productUpdate.ProStock : producto.ProStock;
+            await context.SaveChangesAsync(); 
         }
     }
 

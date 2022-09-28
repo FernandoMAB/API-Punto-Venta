@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using API_Punto_Venta.Context;
+using API_Punto_Venta.Exceptions;
+using API_Punto_Venta.Util;
+using API_Punto_Venta.Services;
 
 namespace API_Punto_Venta.Controllers
 {
@@ -15,11 +18,14 @@ namespace API_Punto_Venta.Controllers
     {
         private IConfiguration _config;
         private PuntoVentaContext context;
+        IPermisoService permisoService;
 
-        public LoginController(IConfiguration config, PuntoVentaContext dbcontext)
+
+        public LoginController(IConfiguration config, PuntoVentaContext dbcontext, IPermisoService permisoService)
         {
             _config = config;
             this.context = dbcontext;
+            this.permisoService = permisoService;
         }
 
         [AllowAnonymous]
@@ -30,7 +36,7 @@ namespace API_Punto_Venta.Controllers
 
             if(user != null)
             {
-                var token = Generate(user);
+                var token = GenerateInicial(user);
                 var tokenUsu = new TokenUsu();
                 tokenUsu.token = token;
                 tokenUsu.Roles = user.Rols;
@@ -41,7 +47,36 @@ namespace API_Punto_Venta.Controllers
             return NotFound("Solicitud Denegada");
         }
 
-        private string Generate(Usuario user)
+        [Authorize]
+        [HttpPost("SelectRole")]
+        public IActionResult SelectRole([FromBody] UserLogin userLogin)
+        {
+            try
+            {
+                if (userLogin.roleId == 0)
+                {
+                    return BadRequest();
+                }
+                var user = Authenticate(userLogin);
+
+                if (user != null)
+                {
+                    var token = Generate(user, userLogin.roleId, userLogin.cajaId);
+                    var tokenUsu = new TokenRole();
+                    tokenUsu.token = token;
+                    tokenUsu.permiso = permisoService.GetPermisoByRol(userLogin.roleId);
+                    return Ok(tokenUsu);
+                }
+
+                return NotFound("Solicitud Denegada");
+            }
+            catch (Exception ex)
+            {
+                return Conflict(ex.Message);
+            }
+        }
+
+        private string GenerateInicial(Usuario user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -49,10 +84,37 @@ namespace API_Punto_Venta.Controllers
             var claims = new []
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UsuPNombre),
+                new Claim(ClaimTypes.Email, user.UsuEmail)
+            };
+
+            var token = new JwtSecurityToken(_config["Jwt:Issuer"],
+            _config["Jwt:Audience"],
+            claims,
+            expires: DateTime.Now.AddMinutes(2),
+            signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private string Generate(Usuario user, int roleId, int cajaId)
+        {
+            var checkRole = user.Rols.Where(x => x.RolId == roleId);
+            if (checkRole.IsNullOrEmpty())
+            {
+                throw new BusinessException(Constants.ROLENOTFOUND);
+            }
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.UsuPNombre),
                 new Claim(ClaimTypes.Email, user.UsuEmail),
                 new Claim(ClaimTypes.GivenName, user.UsuPNombre),
-                new Claim(ClaimTypes.Role, user.UsuEstado),
-                new Claim(ClaimTypes.Surname, user.UsuPApellido)
+                new Claim(ClaimTypes.Role, roleId.ToString()),
+                new Claim(ClaimTypes.Surname, user.UsuPApellido),
+                new Claim(ClaimTypes.SerialNumber, user.UsuId.ToString()),
+                new Claim(ClaimTypes.GroupSid, cajaId.ToString())
             };
 
             var token = new JwtSecurityToken(_config["Jwt:Issuer"],
