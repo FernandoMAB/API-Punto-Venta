@@ -18,13 +18,19 @@ public class ProductoService : IProductoService
 
     public IEnumerable<Producto> GetAll()
     {
-        return context.Productos.Include(x => x.CategoriaProductos).ThenInclude(c => c.Cat);
+        if (context.Catalogos.Any())
+        {
+            return context.Productos.Include(x => x.CategoriaProductos).ThenInclude(c => c.Cat);
+        }
+        else throw new NotFoundException(Constants.NONREGIST);
     }
 
     public Producto? GetProducto(int id)
     {
-        var producto = context.Productos.Find(id);
-        return producto;
+        return context.Productos.Find(id)
+            is Producto producto
+                    ? producto
+                    : throw new NotFoundException(Constants.NONPROD);
     }
 
     public Producto? GetProductoByCod(string codBarras)
@@ -34,8 +40,8 @@ public class ProductoService : IProductoService
                     : throw new NotFoundException(Constants.NONPROD);
     }
 
-    public async Task Save(Producto producto){
-
+    public async Task<IResult> Save(Producto producto)
+    {
         if (!context.Productos.Any())
             producto.ProId = 1;
         else
@@ -43,9 +49,10 @@ public class ProductoService : IProductoService
         
         context.Productos.Add(producto);
         await context.SaveChangesAsync();
+        return Results.Created($"{producto.ProId}", producto);
     }
 
-    public async Task Update(int id, Producto producto)
+    public async Task<IResult> Update(int id, Producto producto)
     {
         var productUpdate = context.Productos.Find(id);
 
@@ -62,11 +69,13 @@ public class ProductoService : IProductoService
            productUpdate.ProDetalle     = producto.ProDetalle == null   ? productUpdate.ProDetalle : producto.ProDetalle;
            productUpdate.ProEstado      = producto.ProEstado == null    ? productUpdate.ProEstado : producto.ProEstado;
            productUpdate.ProStock      = producto.ProStock == null    ? productUpdate.ProStock : producto.ProStock;
-            await context.SaveChangesAsync(); 
+            await context.SaveChangesAsync();
+            return Results.Ok(Constants.UPDATEEX);
         }
+        throw new NotFoundException(Constants.NOTFOUND);
     }
 
-    public async Task Delete(int id)
+    public async Task<IResult> Delete(int id)
     {
         var productoToDelete = context.Productos.Find(id);
 
@@ -74,7 +83,9 @@ public class ProductoService : IProductoService
         {
             context.Remove(productoToDelete);
             await context.SaveChangesAsync();
+            return Results.Ok(Constants.DELREGEX);
         }
+        throw new NotFoundException(Constants.NOTFOUND);
     }
 }
 
@@ -83,7 +94,7 @@ public interface IProductoService
     IEnumerable<Producto> GetAll();
     Producto? GetProducto(int id);
     Producto? GetProductoByCod(string codBarras);
-    Task Save(Producto producto);
-    Task Update(int id, Producto producto);
-    Task Delete(int id);
+    Task<IResult> Save(Producto producto);
+    Task<IResult> Update(int id, Producto producto);
+    Task<IResult> Delete(int id);
 }
