@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using API_Punto_Venta.Models;
 using API_Punto_Venta.Services;
 using Microsoft.AspNetCore.Authorization;
+using API_Punto_Venta.Exceptions;
 
 namespace API_Punto_Venta.Controllers
 {
@@ -36,6 +37,28 @@ namespace API_Punto_Venta.Controllers
                 return Ok(producto);
             else 
                 return NotFound($"No se encontraron productos con este id : {id}");
+        }
+
+        [HttpGet("getByCode/{code}")]
+        public IActionResult GetByName(string code)
+        {
+            try
+            {
+                var catalogos = productoService.GetProductoByCod(code);
+                return Ok(catalogos);
+            }
+            catch (BusinessException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpPost]

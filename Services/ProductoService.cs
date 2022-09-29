@@ -1,5 +1,7 @@
 using API_Punto_Venta.Context;
+using API_Punto_Venta.Exceptions;
 using API_Punto_Venta.Models;
+using API_Punto_Venta.Util;
 using Microsoft.EntityFrameworkCore;
 
 namespace API_Punto_Venta.Services;
@@ -23,6 +25,13 @@ public class ProductoService : IProductoService
     {
         var producto = context.Productos.Find(id);
         return producto;
+    }
+
+    public Producto? GetProductoByCod(string codBarras)
+    {
+        return context.Productos.First(x => x.ProCodBarras.Equals(codBarras)) is Producto producto
+                    ? producto
+                    : throw new NotFoundException(Constants.NONPROD);
     }
 
     public async Task Save(Producto producto){
@@ -73,6 +82,7 @@ public interface IProductoService
 {
     IEnumerable<Producto> GetAll();
     Producto? GetProducto(int id);
+    Producto? GetProductoByCod(string codBarras);
     Task Save(Producto producto);
     Task Update(int id, Producto producto);
     Task Delete(int id);

@@ -558,6 +558,9 @@ namespace API_Punto_Venta.Context
 
                             j.IndexerProperty<int>("FadId").HasColumnName("FAD_ID");
                         });
+
+                entity.Ignore(e => e.ProCantidad);
+
             });
 
             modelBuilder.Entity<Rol>(entity =>

@@ -24,6 +24,7 @@ namespace API_Punto_Venta.Models
         public string? ProDetalle { get; set; }
         public string? ProEstado { get; set; }
         public int? ProStock { get; set; }
+        public int? ProCantidad { get; set; }
 
         public virtual Compra? Com { get; set; }
         public virtual ICollection<CategoriaProducto> CategoriaProductos { get; set; }
