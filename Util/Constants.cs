@@ -2,11 +2,14 @@ namespace API_Punto_Venta.Util;
 
 public class Constants
 {
+    public const int ROUND_VAL = 4;
+
     public const string ESTADO_ELIMINADO = "E";
     public const string ESTADO_VIGENTE = "V";
 
 
     public const string NOTFOUND = @"No se encontró registro";
+    public const string NOTSTOCK = @"No se existe el stock necesario en el producto ";
     public const string ROLENOTFOUND = @"Cliente no tiene dicho rol";
     public const string MULTIPLENOTFOUND = @"No se encontraron registros";
     public const string NEGATIVEBALANCE = @"El saldo no puede ser negativo";
@@ -18,6 +21,7 @@ public class Constants
     public const string NONPERSON = @"No existe persona";
     public const string NONUSER = @"No existe usuario";
     public const string NONCATA = @"No existe catalogo";
+    public const string NONFACT = @"No existe factura";
     public const string NONPROD = @"No existe producto";
     public const string NONDOCU = @"No existe documento";
     public const string NONCALE = @"No existe calificación";

@@ -36,6 +36,7 @@ builder.Services.AddScoped<ICategoriaService,CategoriaService>();
 builder.Services.AddScoped<IParametroService,ParametroService>();
 builder.Services.AddScoped<ICatalogoService, CatalogoService>();
 builder.Services.AddScoped<IDocumentoService,DocumentoService>();
+builder.Services.AddTransient<IFacturaService, FacturaService>();
 
 var app = builder.Build();
 
