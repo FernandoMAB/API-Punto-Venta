@@ -1,66 +1,63 @@
 using API_Punto_Venta.Context;
+using API_Punto_Venta.Exceptions;
 using API_Punto_Venta.Models;
-using Microsoft.EntityFrameworkCore;
+using API_Punto_Venta.Util;
+
 namespace API_Punto_Venta.Services;
 
 public class CategoriaService : ICategoriaService
 {
-    PuntoVentaContext context;
+    private readonly PuntoVentaContext _context;
 
     public CategoriaService(PuntoVentaContext dbcontext)
     {
-        this.context = dbcontext;
+        _context = dbcontext;
     }
 
     public IEnumerable<Categorium> GetAll()
     {
-        if(context.Categoria.Any())
-        return context.Categoria.Where(x => x.CatEstado != Util.Constants.ESTADO_ELIMINADO);
-        else return null;
+        if (_context.Categoria.Any())
+            return _context.Categoria.Where(x => x.CatEstado != Constants.ESTADO_ELIMINADO);
+        return new List<Categorium>();
     }
-    
-    public Categorium? GetCategoria(int id)
+
+    public Categorium GetCategoria(int id)
     {
-        return context.Categoria.Find(id)
-                is Categorium cate
+        return _context.Categoria.Find(id)
+                is { } cate
                     ? cate
-                    : null;
+                    : throw new NotFoundException(Constants.NOTFOUND);
     }
     public async Task<IResult> Save(Categorium categoria)
     {
-        if(!context.Categoria.Any())
+        if (!_context.Categoria.Any())
             categoria.CatId = 1;
         else
-            categoria.CatId = context.Categoria.Max(x => x.CatId) + 1;
-        context.Categoria.Add(categoria);
-        await context.SaveChangesAsync();
-        return Results.Created($"{categoria.CatId}",categoria.CatId);
+            categoria.CatId = _context.Categoria.Max(x => x.CatId) + 1;
+        _context.Categoria.Add(categoria);
+        await _context.SaveChangesAsync();
+        return Results.Created($"{categoria.CatId}", categoria.CatId);
     }
 
     public async Task<IResult> Update(int id, Categorium categoria)
     {
-        var categoriaToUpdate = context.Categoria.Find(id);
+        var categoriaToUpdate = _context.Categoria.Find(id);
 
-        if(categoriaToUpdate != null)
-        {
-            categoriaToUpdate.CatDescrip = categoria.CatDescrip;
-            categoriaToUpdate.CatEstado = categoria.CatEstado;
+        if (categoriaToUpdate == null) throw new NotFoundException(Constants.NOTFOUND);
+        categoriaToUpdate.CatDescrip = categoria.CatDescrip;
+        categoriaToUpdate.CatEstado = categoria.CatEstado;
 
-            await context.SaveChangesAsync();
-            return Results.Ok(categoriaToUpdate);
-        }
-        return null;
+        await _context.SaveChangesAsync();
+        return Results.Ok(categoriaToUpdate);
     }
 
     public async Task<IResult> Delete(int id)
     {
-        if(await context.Categoria.FindAsync(id) is Categorium categoria)
-        {
-            categoria.CatEstado = Util.Constants.ESTADO_ELIMINADO;
-            await context.SaveChangesAsync();
-            return Results.Ok(categoria);
-        }
-        return null;
+        if (await _context.Categoria.FindAsync(id) is not { } categoria)
+            throw new NotFoundException(Constants.NOTFOUND);
+        categoria.CatEstado = Constants.ESTADO_ELIMINADO;
+        await _context.SaveChangesAsync();
+        return Results.Ok(categoria);
     }
 
 }
@@ -68,7 +65,7 @@ public class CategoriaService : ICategoriaService
 public interface ICategoriaService
 {
     IEnumerable<Categorium> GetAll();
-    Categorium? GetCategoria(int id);
+    Categorium GetCategoria(int id);
     Task<IResult> Save(Categorium categoria);
     Task<IResult> Update(int id, Categorium categoria);
     Task<IResult> Delete(int id);

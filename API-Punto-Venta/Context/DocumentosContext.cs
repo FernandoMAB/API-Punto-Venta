@@ -1,14 +1,11 @@
 ﻿using API_Punto_Venta.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Drawing.Drawing2D;
 
 namespace API_Punto_Venta.Context
 {
-    public class DocumentosContext
+    public static class DocumentosContext
     {
-        public DocumentosContext() { }
-
-        public static void getDocumentos(ModelBuilder modelBuilder) 
+        public static void GetDocumentos(ModelBuilder modelBuilder) 
         {
             modelBuilder.Entity<Documento>( entity =>
             {

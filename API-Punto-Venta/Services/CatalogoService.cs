@@ -3,71 +3,82 @@ using API_Punto_Venta.Exceptions;
 using API_Punto_Venta.Models;
 using API_Punto_Venta.Util;
 using Microsoft.EntityFrameworkCore;
-using System.Xml.Linq;
+
 
 namespace API_Punto_Venta.Services
 {
     public class CatalogoService : ICatalogoService
     {
-        PuntoVentaContext context;
-        private readonly ILogger<CatalogoService> logger;
+        private readonly PuntoVentaContext _context;
+        private readonly ILogger<CatalogoService> _logger;
 
-        public CatalogoService (PuntoVentaContext dbcontext, ILogger<CatalogoService> logger)
+        public CatalogoService(PuntoVentaContext dbcontext, ILogger<CatalogoService> logger)
         {
-            context = dbcontext;
-            this.logger = logger;
+            _context = dbcontext;
+            _logger = logger;
         }
 
-        public IEnumerable<Catalogo> GetAll()
+        public async Task<IEnumerable<Catalogo>> GetAll()
         {
-            if (context.Catalogos.Any())
-                return context.Catalogos;
-            else throw new NotFoundException(Constants.NONREGIST);
+            _logger.LogDebug("Start service get all catalogs");
+            if (_context.Catalogos.Any())
+                return await _context.Catalogos.ToListAsync();
+            throw new NotFoundException(Constants.NONREGIST);
         }
 
-        public IEnumerable<Catalogo>? GetByName(string name)
+        public IEnumerable<Catalogo> GetByName(string name)
         {
-            return context.Catalogos.Where(x => x.CataNombre == name)
-                                    .Where(x => x.CataEstado == Constants.ESTADO_VIGENTE)
-                is IEnumerable<Catalogo> catalogo
-                    ? catalogo
-                    : throw new NotFoundException(Constants.NONCATA);
+            return _context.Catalogos.Where(x => x.CataNombre == name)
+                .Where(x => x.CataEstado == Constants.ESTADO_VIGENTE) as IEnumerable<Catalogo> 
+                   ?? throw new NotFoundException(Constants.NONCATA);
         }
 
         public async Task<IResult> Save(Catalogo catalogo)
         {
-            context.Catalogos.Add(catalogo);
-            await context.SaveChangesAsync();
+            catalogo.FechaIngreso = DateTime.Now;
+            if (_context.Catalogos.FirstOrDefault(x => x.CataNombre == catalogo.CataNombre && x.CataCodigo == catalogo.CataCodigo) is { })
+            {
+                throw new BusinessException(Constants.CATAREPE);
+            }
+            _context.Catalogos.Add(catalogo);
+            await _context.SaveChangesAsync();
             return Results.Created($"{catalogo.CataNombre}", catalogo);
         }
 
-        public async Task<IResult> Update(string name, string code, Catalogo catalogo)
+        public async Task<IResult> Update(int id, Catalogo catalogo)
         {
-            var cataToUpdate = context.Catalogos.First(x => x.CataNombre.Equals(name) && x.CataCodigo.Equals(code));
-
+            var cataToUpdate = _context.Catalogos.Find(id);
+            if (_context.Catalogos.FirstOrDefault(x => x.CataNombre == catalogo.CataNombre && x.CataCodigo == catalogo.CataCodigo
+                && x.CataId != id) is { })
+            {
+                throw new BusinessException(Constants.CATAREPE);
+            }
+            
             if (cataToUpdate != null)
             {
 
                 cataToUpdate.CataNombre = catalogo.CataNombre;
                 cataToUpdate.CataCodigo = catalogo.CataCodigo;
-                cataToUpdate.CataValor  = catalogo.CataValor;
+                cataToUpdate.CataValor = catalogo.CataValor;
                 cataToUpdate.CataEstado = catalogo.CataEstado;
+                cataToUpdate.FechaModificacion = DateTime.Now;
+                cataToUpdate.UsuarioModificacion = catalogo.UsuarioModificacion;
 
-                await context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
                 return Results.Ok(Constants.UPDATEEX);
 
             }
             throw new NotFoundException(Constants.NOTFOUND);
         }
 
-        public async Task<IResult> Delete(string name, string code)
+        public async Task<IResult> Delete(int id)
         {
-            var cataToDelete = context.Catalogos.First(x => x.CataNombre.Equals(name) && x.CataCodigo.Equals(code));
+            var cataToDelete = _context.Catalogos.Find(id);
 
             if (cataToDelete != null)
             {
-                context.Catalogos.Remove(cataToDelete);
-                await context.SaveChangesAsync();
+                _context.Catalogos.Remove(cataToDelete);
+                await _context.SaveChangesAsync();
                 return Results.Ok(Constants.DELREGEX);
             }
             throw new NotFoundException(Constants.NOTFOUND);
@@ -77,10 +88,10 @@ namespace API_Punto_Venta.Services
 
     public interface ICatalogoService
     {
-        IEnumerable<Catalogo> GetAll();
-        IEnumerable<Catalogo>? GetByName(string name);
+        Task<IEnumerable<Catalogo>> GetAll();
+        IEnumerable<Catalogo> GetByName(string name);
         Task<IResult> Save(Catalogo catalogo);
-        Task<IResult> Update(string name, string code, Catalogo catalogo);
-        Task<IResult> Delete(string name, string code);
+        Task<IResult> Update(int id, Catalogo catalogo);
+        Task<IResult> Delete(int id);
     }
 }

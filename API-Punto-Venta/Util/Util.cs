@@ -19,7 +19,7 @@ namespace API_Punto_Venta.Util
         public static bool IsPrimitive(this Type type)
         {
             if (type == typeof(String)) return true;
-            return (type.IsValueType & type.IsPrimitive);
+            return (type.IsValueType && type.IsPrimitive);
         }
 
 
@@ -98,7 +98,7 @@ namespace API_Punto_Venta.Util
             public static void ForEach(this Array array, Action<Array, int[]> action)
             {
                 if (array.LongLength == 0) return;
-                ArrayTraverse walker = new ArrayTraverse(array);
+                ArrayTraverse walker = new(array);
                 do action(array, walker.Position);
                 while (walker.Step());
             }
@@ -107,7 +107,7 @@ namespace API_Punto_Venta.Util
         internal class ArrayTraverse
         {
             public int[] Position;
-            private int[] maxLengths;
+            private readonly int[] maxLengths;
 
             public ArrayTraverse(Array array)
             {

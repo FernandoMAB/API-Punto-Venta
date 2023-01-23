@@ -2,58 +2,69 @@ using API_Punto_Venta.Context;
 using API_Punto_Venta.Exceptions;
 using API_Punto_Venta.Models;
 using API_Punto_Venta.Util;
-using Microsoft.EntityFrameworkCore;
 
 namespace API_Punto_Venta.Services
 {
     public class DocumentoService : IDocumentoService
     {
-        PuntoVentaContext context;
-        private readonly ILogger<DocumentoService> logger;
+        readonly PuntoVentaContext _context;
+        private readonly ILogger<DocumentoService> _logger;
 
         public DocumentoService(PuntoVentaContext dbcontext, ILogger<DocumentoService> logger)
         {
-            context = dbcontext;
-            this.logger = logger;
+            _context = dbcontext;
+            _logger = logger;
         }
 
         public IEnumerable<Documento> GetAll()
         {
-            if (context.Documentos.Any())
-                return context.Documentos;
+            _logger.LogDebug("Start service get all Documents");
+            if (_context.Documentos.Any())
+                return _context.Documentos;
             else throw new NotFoundException(Constants.NONREGIST);
         }
 
-        public Documento? Get(int id)
+        public Documento Get(int id)
         {
-            return context.Documentos.Find(id)
-                is Documento documento
-                    ? documento
+            return _context.Documentos.Find(id)
+                is { } document
+                    ? document
                     : throw new NotFoundException(Constants.NONDOCU);
         }
 
         public async Task<IResult> Save(Documento documento)
         {
-            context.Documentos.Add(documento);
-            await context.SaveChangesAsync();
+            if (_context.Documentos.FirstOrDefault(x => x.DocName == documento.DocName && x.DocExtension == documento.DocExtension) is {})
+            {
+                throw new BusinessException(Constants.DOCUREPE);
+            }
+            
+            _context.Documentos.Add(documento);
+            await _context.SaveChangesAsync();
             return Results.Created($"{documento.DocId}", documento);
         }
 
         public async Task<IResult> Update(int id, Documento documento)
         {
-            var documenToUpdate = context.Documentos.Find(id);
+            if (_context.Documentos.FirstOrDefault(x => x.DocName == documento.DocName && x.DocExtension == documento.DocExtension
+                && x.DocId != id) is {})
+            {
+                throw new BusinessException(Constants.DOCUREPE);
+            }
+            
+            var documenToUpdate = _context.Documentos.Find(id);
 
             if (documenToUpdate != null)
             {
 
-                documenToUpdate.DocExtension    = documento.DocExtension;
-                documenToUpdate.DocName         = documento.DocName;
-                documenToUpdate.DocBase64       = documento.DocBase64;
-                documenToUpdate.DocStatus       = documento.DocStatus;
-                documenToUpdate.DocIdClient     = documento.DocIdClient;
-                documenToUpdate.DocIdUploader   = documento.DocIdUploader;
+                documenToUpdate.DocExtension = documento.DocExtension;
+                documenToUpdate.DocName = documento.DocName;
+                documenToUpdate.DocBase64 = documento.DocBase64;
+                documenToUpdate.DocStatus = documento.DocStatus;
+                documenToUpdate.DocIdClient = documento.DocIdClient;
+                documenToUpdate.DocIdUploader = documento.DocIdUploader;
 
-                await context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
                 return Results.Ok(Constants.UPDATEEX);
 
             }
@@ -62,12 +73,12 @@ namespace API_Punto_Venta.Services
 
         public async Task<IResult> Delete(int id)
         {
-            var documenToDelete = context.Documentos.Find(id);
+            var documenToDelete = _context.Documentos.Find(id);
 
             if (documenToDelete != null)
             {
-                context.Documentos.Remove(documenToDelete);
-                await context.SaveChangesAsync();
+                documenToDelete.DocStatus = Constants.ESTADO_ELIMINADO;
+                await _context.SaveChangesAsync();
                 return Results.Ok(Constants.DELREGEX);
             }
             throw new NotFoundException(Constants.NOTFOUND);

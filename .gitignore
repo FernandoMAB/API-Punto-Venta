@@ -360,3 +360,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+.idea/.idea.API-Punto-Venta/.idea/workspace.xml
+.idea/*

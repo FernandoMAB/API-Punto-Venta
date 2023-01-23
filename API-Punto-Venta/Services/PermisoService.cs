@@ -1,78 +1,82 @@
 using API_Punto_Venta.Context;
+using API_Punto_Venta.Exceptions;
 using API_Punto_Venta.Models;
+using API_Punto_Venta.Util;
 using Microsoft.EntityFrameworkCore;
 namespace API_Punto_Venta.Services;
 
-public class PermisoService : IPermisoService 
+public class PermisoService : IPermisoService
 {
-    PuntoVentaContext context;
+    private readonly PuntoVentaContext _context;
     public PermisoService(PuntoVentaContext dbcontext)
     {
-        this.context = dbcontext;
+        _context = dbcontext;
     }
 
     public IEnumerable<Permiso> GetAll()
     {
-        if(context.Permisos.Any())
-        return context.Permisos.Include(x => x.Rol).Where(x => x.PerEstado != Util.Constants.ESTADO_ELIMINADO);
-        else return null;
+        if (_context.Permisos.Any())
+            return _context.Permisos.Include(x => x.Rol).Where(x => x.PerEstado != Constants.ESTADO_ELIMINADO);
+        throw new NotFoundException("No existen registros");
     }
 
-    public Permiso? GetPermiso(int id)
+    public Permiso GetPermiso(int id)
     {
-        return context.Permisos.Find(id)
-                is Permiso permiso
-                    ? permiso
-                    : null;
+        return _context.Permisos.Find(id)
+                is { } permission
+                    ? permission
+                    : throw new NotFoundException(Constants.NONPERM);
     }
 
     public IEnumerable<Permiso> GetPermisoByRol(int idRol)
     {
-        if(context.Permisos.Any())
-        return context.Permisos.Where(x => x.RolId == idRol);
-        else return null;
+        if (_context.Permisos.Any())
+            return _context.Permisos.Where(x => x.RolId == idRol);
+        throw new NotFoundException("No existe Permiso con este Rol id");
     }
     public async Task<IResult> Save(Permiso permiso)
     {
-        if(!context.Permisos.Any())
+        if (!_context.Permisos.Any())
             permiso.PerId = 1;
         else
-            permiso.PerId = context.Permisos.Max(x => x.PerId) + 1;
-        context.Permisos.Add(permiso);
-        await context.SaveChangesAsync();
-        return Results.Created($"{permiso.PerId}",permiso.PerId);
+            permiso.PerId = _context.Permisos.Max(x => x.PerId) + 1;
+        
+        permiso.FechaIngreso = DateTime.Now;
+        _context.Permisos.Add(permiso);
+        await _context.SaveChangesAsync();
+        return Results.Created($"{permiso.PerId}", permiso.PerId);
     }
     public async Task<IResult> Update(int id, Permiso permiso)
     {
-        var permisoToUpdate = context.Permisos.Find(id);
+        var permisoToUpdate = _context.Permisos.Find(id);
 
-        if(permisoToUpdate != null)
-        {
-            permisoToUpdate.RolId = permiso.RolId;
-            permisoToUpdate.PerPantalla = permiso.PerPantalla;
-            permisoToUpdate.PerEstado = permiso.PerEstado;
+        if (permisoToUpdate == null) throw new NotFoundException(Constants.NONPERM);
+        
+        permisoToUpdate.RolId = permiso.RolId;
+        permisoToUpdate.PerPantalla = permiso.PerPantalla;
+        permisoToUpdate.PerEstado = permiso.PerEstado;
+        permisoToUpdate.FechaModificacion = DateTime.Now;
+        permisoToUpdate.UsuarioModificacion = permiso.UsuarioModificacion;
 
-            await context.SaveChangesAsync();
-            return Results.Ok(permisoToUpdate);
-        }
-        return null;
+        await _context.SaveChangesAsync();
+        return Results.Ok(permisoToUpdate);
     }
     public async Task<IResult> Delete(int id)
     {
-        if(await context.Permisos.FindAsync(id) is Permiso permisoDelete)
+        if (await _context.Permisos.FindAsync(id) is { } permisoDelete)
         {
-            permisoDelete.PerEstado = Util.Constants.ESTADO_ELIMINADO;
-            await context.SaveChangesAsync();
+            permisoDelete.PerEstado = Constants.ESTADO_ELIMINADO;
+            await _context.SaveChangesAsync();
             return Results.Ok(permisoDelete);
         }
-        return null;
+        throw new NotFoundException(Constants.NONPERM);
     }
 }
 
 public interface IPermisoService
 {
     IEnumerable<Permiso> GetAll();
-    Permiso? GetPermiso(int id);
+    Permiso GetPermiso(int id);
     IEnumerable<Permiso> GetPermisoByRol(int idRol);
     Task<IResult> Save(Permiso permiso);
     Task<IResult> Update(int id, Permiso permiso);

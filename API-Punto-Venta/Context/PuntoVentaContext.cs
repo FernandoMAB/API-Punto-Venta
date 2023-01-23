@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using API_Punto_Venta.Models;
+﻿using API_Punto_Venta.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace API_Punto_Venta.Context
 {
@@ -32,12 +29,13 @@ namespace API_Punto_Venta.Context
         public virtual DbSet<Usuario> Usuarios { get; set; } = null!;
         public virtual DbSet<Catalogo> Catalogos { get; set; } = null!;
         public virtual DbSet<Documento> Documentos { get; set; } = null!;
+        public virtual DbSet<Statistic> Statistics { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.EnableSensitiveDataLogging(true);
-            optionsBuilder.EnableDetailedErrors(true);
-            optionsBuilder.EnableSensitiveDataLogging(true);
+            optionsBuilder.EnableSensitiveDataLogging();
+            optionsBuilder.EnableDetailedErrors();
+            optionsBuilder.EnableSensitiveDataLogging();
             if (!optionsBuilder.IsConfigured)
             {
                 //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
@@ -99,6 +97,12 @@ namespace API_Punto_Venta.Context
                 entity.Property(e => e.CajRegSalida).HasColumnName("CAJ_REG_SALIDA");
 
                 entity.Property(e => e.CajTotal).HasColumnName("CAJ_TOTAL");
+
+                entity.Property(e => e.UsuarioIngreso).HasColumnName("UsuarioIngreso").HasColumnType("varchar(100)");
+                entity.Property(e => e.UsuarioModificacion).HasColumnName("UsuarioModificacion").HasColumnType("varchar(100)");
+                entity.Property(e => e.FechaIngreso).HasColumnName("FechaIngreso").HasColumnType("datetime");
+                entity.Property(e => e.FechaModificacion).HasColumnName("FechaModificacion").HasColumnType("datetime");
+
             });
 
             modelBuilder.Entity<CategoriaProducto>(entity =>
@@ -225,6 +229,11 @@ namespace API_Punto_Venta.Context
                     .IsUnicode(false)
                     .HasColumnName("CLI_TIPO_IDEN")
                     .IsFixedLength();
+                
+                entity.Property(e => e.UsuarioIngreso).HasColumnName("UsuarioIngreso").HasColumnType("varchar(100)");
+                entity.Property(e => e.UsuarioModificacion).HasColumnName("UsuarioModificacion").HasColumnType("varchar(100)");
+                entity.Property(e => e.FechaIngreso).HasColumnName("FechaIngreso").HasColumnType("datetime");
+                entity.Property(e => e.FechaModificacion).HasColumnName("FechaModificacion").HasColumnType("datetime");
             });
 
             modelBuilder.Entity<Compra>(entity =>
@@ -334,6 +343,10 @@ namespace API_Punto_Venta.Context
                     .IsUnicode(false)
                     .HasColumnName("FAD_NUMERACION");
 
+                entity.Property(e => e.ProId)
+                    .HasColumnType("int")
+                    .HasColumnName("PRO_ID");
+
                 entity.Property(e => e.FadPrecioUnit).HasColumnName("FAD_PRECIO_UNIT");
 
                 entity.Property(e => e.FadSubtotal).HasColumnName("FAD_SUBTOTAL");
@@ -392,6 +405,12 @@ namespace API_Punto_Venta.Context
                     .HasColumnType("datetime")
                     .HasColumnName("KAR_FECHA");
 
+                entity.Property(e => e.KarEntPrecio)
+                    .HasColumnName("KAR_ENT_PRECIO");
+
+                entity.Property(e => e.KarSalPrecio)
+                    .HasColumnName("KAR_SAL_PRECIO");
+
                 entity.Property(e => e.KarSalCantidad).HasColumnName("KAR_SAL_CANTIDAD");
 
                 entity.Property(e => e.KarSalPreTotal).HasColumnName("KAR_SAL_PRE_TOTAL");
@@ -445,6 +464,10 @@ namespace API_Punto_Venta.Context
                     .IsFixedLength()
                     .HasColumnName("PAR_NEMONICO");
 
+                entity.Property(e => e.UsuarioIngreso).HasColumnName("UsuarioIngreso").HasColumnType("varchar(100)");
+                entity.Property(e => e.UsuarioModificacion).HasColumnName("UsuarioModificacion").HasColumnType("varchar(100)");
+                entity.Property(e => e.FechaIngreso).HasColumnName("FechaIngreso").HasColumnType("datetime");
+                entity.Property(e => e.FechaModificacion).HasColumnName("FechaModificacion").HasColumnType("datetime");
             });
 
             modelBuilder.Entity<Permiso>(entity =>
@@ -477,6 +500,11 @@ namespace API_Punto_Venta.Context
                     .WithMany(p => p.Permisos)
                     .HasForeignKey(d => d.RolId)
                     .HasConstraintName("FK_PERMISOS_FK_ROL_PE_ROL");
+                
+                entity.Property(e => e.UsuarioIngreso).HasColumnName("UsuarioIngreso").HasColumnType("varchar(100)");
+                entity.Property(e => e.UsuarioModificacion).HasColumnName("UsuarioModificacion").HasColumnType("varchar(100)");
+                entity.Property(e => e.FechaIngreso).HasColumnName("FechaIngreso").HasColumnType("datetime");
+                entity.Property(e => e.FechaModificacion).HasColumnName("FechaModificacion").HasColumnType("datetime");
             });
 
             modelBuilder.Entity<Producto>(entity =>
@@ -535,6 +563,11 @@ namespace API_Punto_Venta.Context
                     .HasColumnType("int")
                     .IsRequired(false)
                     .HasColumnName("PRO_STOCK");
+                
+                entity.Property(e => e.UsuarioIngreso).HasColumnName("UsuarioIngreso").HasColumnType("varchar(100)");
+                entity.Property(e => e.UsuarioModificacion).HasColumnName("UsuarioModificacion").HasColumnType("varchar(100)");
+                entity.Property(e => e.FechaIngreso).HasColumnName("FechaIngreso").HasColumnType("datetime");
+                entity.Property(e => e.FechaModificacion).HasColumnName("FechaModificacion").HasColumnType("datetime");
 
                 entity.HasOne(d => d.Com)
                     .WithMany(p => p.Productos)
@@ -578,7 +611,8 @@ namespace API_Punto_Venta.Context
                     .HasColumnName("ROL_ID");
 
                 entity.Property(e => e.RolDescrip)
-                    .HasColumnType("text")
+                    .HasColumnType("varchar")
+                    .HasMaxLength(500)
                     .HasColumnName("ROL_DESCRIP");
 
                 entity.Property(e => e.RolEstado)
@@ -586,6 +620,11 @@ namespace API_Punto_Venta.Context
                     .IsUnicode(false)
                     .HasColumnName("ROL_ESTADO")
                     .IsFixedLength();
+                
+                entity.Property(e => e.UsuarioIngreso).HasColumnName("UsuarioIngreso").HasColumnType("varchar(100)");
+                entity.Property(e => e.UsuarioModificacion).HasColumnName("UsuarioModificacion").HasColumnType("varchar(100)");
+                entity.Property(e => e.FechaIngreso).HasColumnName("FechaIngreso").HasColumnType("datetime");
+                entity.Property(e => e.FechaModificacion).HasColumnName("FechaModificacion").HasColumnType("datetime");
 
                 entity.HasMany(d => d.Usus)
                     .WithMany(p => p.Rols)
@@ -699,6 +738,11 @@ namespace API_Punto_Venta.Context
                     .IsUnicode(false)
                     .HasColumnName("USU_USERNAME")
                     .IsFixedLength();
+                
+                entity.Property(e => e.UsuarioIngreso).HasColumnName("UsuarioIngreso").HasColumnType("varchar(100)");
+                entity.Property(e => e.UsuarioModificacion).HasColumnName("UsuarioModificacion").HasColumnType("varchar(100)");
+                entity.Property(e => e.FechaIngreso).HasColumnName("FechaIngreso").HasColumnType("datetime");
+                entity.Property(e => e.FechaModificacion).HasColumnName("FechaModificacion").HasColumnType("datetime");
 
                 entity.HasMany(d => d.Cajs)
                     .WithMany(p => p.Usus)
@@ -726,15 +770,24 @@ namespace API_Punto_Venta.Context
             {
                 entity.ToTable("CATALOGO");
 
-                entity.HasNoKey();
+                entity.HasKey(e => e.CataId);
+
+                entity.Property(e => e.CataId).HasColumnName("CATA_ID");
 
                 entity.Property(p => p.CataNombre).HasColumnType("varchar").HasMaxLength(100).HasColumnName("CATA_NOMBRE").IsRequired();
                 entity.Property(p => p.CataCodigo).HasColumnType("varchar").HasMaxLength(10).HasColumnName("CATA_CODIGO").IsRequired();
                 entity.Property(p => p.CataValor).HasColumnType("varchar").HasMaxLength(100).HasColumnName("CATA_VALOR").IsRequired();
                 entity.Property(p => p.CataEstado).HasColumnType("char").HasMaxLength(1).HasColumnName("CATA_ESTADO").IsRequired();
+                
+                entity.Property(e => e.UsuarioIngreso).HasColumnName("UsuarioIngreso").HasColumnType("varchar(100)");
+                entity.Property(e => e.UsuarioModificacion).HasColumnName("UsuarioModificacion").HasColumnType("varchar(100)");
+                entity.Property(e => e.FechaIngreso).HasColumnName("FechaIngreso").HasColumnType("datetime");
+                entity.Property(e => e.FechaModificacion).HasColumnName("FechaModificacion").HasColumnType("datetime");
             });
 
-            DocumentosContext.getDocumentos(modelBuilder);
+            DocumentosContext.GetDocumentos(modelBuilder);
+            
+            EstadisticasContext.GetEstadisticas(modelBuilder);
 
             OnModelCreatingPartial(modelBuilder);
         }

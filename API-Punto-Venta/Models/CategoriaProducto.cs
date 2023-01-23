@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace API_Punto_Venta.Models
 {
-    public partial class CategoriaProducto
+    public class CategoriaProducto
     {
         public int CaProId { get; set; }
         public int? ProId { get; set; }

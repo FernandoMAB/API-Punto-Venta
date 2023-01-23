@@ -2,7 +2,8 @@
 {
     public class BusinessException : Exception
     {
-        public BusinessException() : base() { }
+        public BusinessException()
+        { }
         public BusinessException(string message) : base(message) { }
     }
 }

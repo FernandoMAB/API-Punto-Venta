@@ -1,67 +1,86 @@
 using API_Punto_Venta.Context;
+using API_Punto_Venta.Exceptions;
 using API_Punto_Venta.Models;
+using API_Punto_Venta.Util;
 
 namespace API_Punto_Venta.Services;
 
 public class RolService : IRolService
 {
-    PuntoVentaContext context;
+    private readonly PuntoVentaContext _context;
 
     public RolService(PuntoVentaContext dbcontext)
     {
-        this.context = dbcontext;
+        _context = dbcontext;
     }
 
     public IEnumerable<Rol> GetAll()
     {
-        return context.Rols.Where(x => x.RolEstado != Util.Constants.ESTADO_ELIMINADO).OrderBy(x => x.RolId);
+        return _context.Rols.Where(x => x.RolEstado != Constants.ESTADO_ELIMINADO).OrderBy(x => x.RolId);
     }
 
     public Rol? GetRol(int id)
     {
-        return context.Rols.Find(id)
-                is Rol model
+        return _context.Rols.Find(id)
+                is { } model
                     ? model
                     : null;
     }
 
-    public async Task<IResult> Save(Rol rol){
+    public async Task<IResult> Save(Rol rol)
+    {
+        //Validación de Repetido
+        if (_context.Rols.FirstOrDefault(x => x.RolDescrip == rol.RolDescrip) is {})
+        {
+            throw new BusinessException(Constants.ROLREPE);
+        }
 
-        if (!context.Rols.Any())
+        if (!_context.Rols.Any())
             rol.RolId = 1;
         else
-            rol.RolId = context.Rols.Max(x => x.RolId) + 1;
-        context.Rols.Add(rol);
-        await context.SaveChangesAsync();
+            rol.RolId = _context.Rols.Max(x => x.RolId) + 1;
+        
+        rol.FechaIngreso = DateTime.Now;
+        _context.Rols.Add(rol);
+        await _context.SaveChangesAsync();
         return Results.Created($"{rol.RolId}", rol.RolId);
     }
 
     public async Task<IResult> Update(int id, Rol rol)
     {
-        var rolUpdate = context.Rols.Find(id);
-
-        if(rolUpdate != null)
+        //Validación de Repetido
+        if (_context.Rols.FirstOrDefault(x => x.RolDescrip == rol.RolDescrip
+            && x.RolId != id) is {})
         {
-            rolUpdate.RolDescrip        = rol.RolDescrip;
-            rolUpdate.Permisos          = rol.Permisos;
-            rolUpdate.RolEstado         = rol.RolEstado;
+            throw new BusinessException(Constants.ROLREPE);
+        }
+        
+        var rolUpdate = _context.Rols.Find(id);
 
-            await context.SaveChangesAsync();
+        if (rolUpdate != null)
+        {
+            rolUpdate.RolDescrip = rol.RolDescrip;
+            rolUpdate.Permisos = rol.Permisos;
+            rolUpdate.RolEstado = rol.RolEstado;
+            rolUpdate.FechaModificacion = DateTime.Now;
+            rolUpdate.UsuarioModificacion = rol.UsuarioModificacion;
+
+            await _context.SaveChangesAsync();
             return Results.Ok(rolUpdate);
         }
-        return null;
+        throw new NotFoundException(Constants.NONEROL);
     }
 
     public async Task<IResult> Delete(int id)
     {
 
-        if(await context.Rols.FindAsync(id) is Rol rolToDelete)
+        if (await _context.Rols.FindAsync(id) is { } rolToDelete)
         {
-            rolToDelete.RolEstado = Util.Constants.ESTADO_ELIMINADO;
-            await context.SaveChangesAsync();
+            rolToDelete.RolEstado = Constants.ESTADO_ELIMINADO;
+            await _context.SaveChangesAsync();
             return Results.Ok(rolToDelete);
         }
-        return null;
+        throw new NotFoundException(Constants.NONEROL);
     }
 }
 
